@@ -28,7 +28,8 @@ func postHandler(storage Storage) http.HandlerFunc {
 		parts := strings.Split(r.URL.Path, "/")
 		// Ожидаемый формат: /update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>
 		if len(parts) != 5 {
-			http.Error(w, "Invalid request format", http.StatusBadRequest)
+			//http.Error(w, "Invalid request format", http.StatusBadRequest)
+			http.Error(w, "Metric name is required", http.StatusNotFound)
 			return
 		}
 
@@ -40,10 +41,10 @@ func postHandler(storage Storage) http.HandlerFunc {
 			http.Error(w, "Invalid metric type", http.StatusBadRequest)
 			return
 		}
-		if name == "" {
-			http.Error(w, "Metric name is required", http.StatusNotFound)
-			return
-		}
+		//if name == "" {
+		//	http.Error(w, "Metric name is required", http.StatusNotFound)
+		//	return
+		//}
 
 		var value internal.MetricValue
 		var err error
