@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/FogusB/metrics-alerts-svc/internal/collectMetrics"
+	"github.com/FogusB/metrics-alerts-svc/internal/collects"
 	"github.com/FogusB/metrics-alerts-svc/internal/senders"
 	"time"
 )
@@ -21,7 +21,7 @@ func main() {
 		for {
 			select {
 			case <-tickerPoll.C:
-				for key, value := range collectMetrics.CollectMetrics() {
+				for key, value := range collects.CollectMetrics() {
 					metrics[key] = value
 				}
 				// Увеличиваем PollCount

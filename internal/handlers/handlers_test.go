@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"bytes"
-	"github.com/FogusB/metrics-alerts-svc/internal/memStorage"
+	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,10 +11,10 @@ import (
 
 // MockStorage - моковая реализация интерфейса Storage для тестирования
 type MockStorage struct {
-	UpdateMetricFunc func(name string, mType memStorage.MetricType, value memStorage.MetricValue)
+	UpdateMetricFunc func(name string, mType storages.MetricType, value storages.MetricValue)
 }
 
-func (m *MockStorage) UpdateMetric(name string, mType memStorage.MetricType, value memStorage.MetricValue) {
+func (m *MockStorage) UpdateMetric(name string, mType storages.MetricType, value storages.MetricValue) {
 	if m.UpdateMetricFunc != nil {
 		m.UpdateMetricFunc(name, mType, value)
 	}

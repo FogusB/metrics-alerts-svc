@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
-	"github.com/FogusB/metrics-alerts-svc/internal/memStorage"
+	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 	"net/http"
 )
 
 type Storage interface {
-	UpdateMetric(name string, mType memStorage.MetricType, value memStorage.MetricValue)
+	UpdateMetric(name string, mType storages.MetricType, value storages.MetricValue)
 }
 
 func main() {
-	var storage Storage = memStorage.NewMemStorage()
+	var storage Storage = storages.NewMemStorage()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/update/", handlers.PostHandler(storage))
 

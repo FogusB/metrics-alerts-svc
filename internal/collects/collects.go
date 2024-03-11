@@ -1,4 +1,4 @@
-package collectMetrics
+package collects
 
 import (
 	"math/rand"

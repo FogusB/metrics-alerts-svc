@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
-	"github.com/FogusB/metrics-alerts-svc/internal/memStorage"
+	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
@@ -29,7 +29,7 @@ func TestUpdateMetric(t *testing.T) {
 }
 
 func TestPostHandler(t *testing.T) {
-	storage := memStorage.NewMemStorage()
+	storage := storages.NewMemStorage()
 	handler := http.HandlerFunc(handlers.PostHandler(storage))
 
 	t.Run("ValidRequest", func(t *testing.T) {

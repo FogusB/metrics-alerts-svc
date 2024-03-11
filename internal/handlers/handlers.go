@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/FogusB/metrics-alerts-svc/internal/memStorage"
+	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
 type Storage interface {
-	UpdateMetric(name string, mType memStorage.MetricType, value memStorage.MetricValue)
+	UpdateMetric(name string, mType storages.MetricType, value storages.MetricValue)
 }
 
 func PostHandler(storage Storage) http.HandlerFunc {
@@ -33,11 +33,11 @@ func PostHandler(storage Storage) http.HandlerFunc {
 			return
 		}
 
-		mType := memStorage.MetricType(parts[2])
+		mType := storages.MetricType(parts[2])
 		name := parts[3]
 		rawValue := parts[4]
 
-		if mType != memStorage.Gauge && mType != memStorage.Counter {
+		if mType != storages.Gauge && mType != storages.Counter {
 			http.Error(w, "Invalid metric type", http.StatusBadRequest)
 			return
 		}
@@ -46,9 +46,9 @@ func PostHandler(storage Storage) http.HandlerFunc {
 		//	return
 		//}
 
-		var value memStorage.MetricValue
+		var value storages.MetricValue
 		var err error
-		if mType == memStorage.Gauge {
+		if mType == storages.Gauge {
 			value.GaugeValue, err = strconv.ParseFloat(rawValue, 64)
 			if err != nil {
 				http.Error(w, "Invalid value for gauge", http.StatusBadRequest)
