@@ -1,7 +1,6 @@
-package internal
+package memStorage
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -45,5 +44,5 @@ func (s *MemStorage) UpdateMetric(name string, mType MetricType, value MetricVal
 		}
 		s.metrics[name] = value
 	}
-	fmt.Printf("Key: %s, value: %v\n", name, value)
+	//fmt.Printf("Key: %s, value: %v\n", name, value)
 }
