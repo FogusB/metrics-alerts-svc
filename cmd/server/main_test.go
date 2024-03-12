@@ -30,7 +30,7 @@ func TestUpdateMetric(t *testing.T) {
 
 func TestPostHandler(t *testing.T) {
 	storage := storages.NewMemStorage()
-	handler := http.HandlerFunc(handlers.PostHandler(storage))
+	handler := handlers.PostHandler(storage)
 
 	t.Run("ValidRequest", func(t *testing.T) {
 		body := bytes.NewBufferString(`valid`)
