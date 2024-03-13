@@ -2,15 +2,13 @@
 package routers
 
 import (
-	"fmt"
-
 	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
 // Run запускает HTTP-сервер с заданными маршрутами.
-func Run(metricHandler *handlers.MetricHandler) {
+func Run(metricHandler *handlers.MetricHandler, addr string) {
 	router := gin.Default()
 
 	// Загрузка HTML-шаблонов
@@ -18,12 +16,10 @@ func Run(metricHandler *handlers.MetricHandler) {
 
 	ServeRoutes(router, metricHandler)
 
-	err := router.Run(":8080")
-	if err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	log.Printf("Starting server on %s\n", addr)
+	if err := router.Run(addr); err != nil {
+		log.Fatalf("Could not start server: %s\n", err)
 	}
-
-	fmt.Println("Server is running on http://localhost:8080")
 }
 
 // ServeRoutes настраивает маршруты для веб-сервера.

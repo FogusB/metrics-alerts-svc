@@ -1,16 +1,25 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"github.com/FogusB/metrics-alerts-svc/internal/collects"
 	"github.com/FogusB/metrics-alerts-svc/internal/senders"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func main() {
-	serverAddress := "http://localhost:8080"
-	pollInterval := 2 * time.Second
-	reportInterval := 10 * time.Second
+	var serverAddr string
+	var reportInterval, pollInterval time.Duration
+
+	flag.StringVar(&serverAddr, "a", "localhost:8080", "HTTP server address")
+	flag.DurationVar(&reportInterval, "r", 10*time.Second, "Report interval (s)")
+	flag.DurationVar(&pollInterval, "p", 2*time.Second, "Poll interval (s)")
+	flag.Parse()
+
+	log.Infof("Server address: %s\n", serverAddr)
+	log.Infof("Report interval: %v\n", reportInterval)
+	log.Infof("Poll interval: %v\n", pollInterval)
 
 	tickerPoll := time.NewTicker(pollInterval)
 	tickerReport := time.NewTicker(reportInterval)
@@ -31,18 +40,18 @@ func main() {
 					metrics["PollCount"] = int64(1)
 				}
 			case <-tickerReport.C:
-				fmt.Println("==============Metrics====================")
+				log.Info("==============Metrics====================")
 				for key, value := range metrics {
 					if key == "GCCPUFraction" || key == "RandomValue" {
-						fmt.Printf("%s : %f\n", key, value)
+						log.Infof("%s : %f\n", key, value)
 					} else {
-						fmt.Printf("%s : %d\n", key, value)
+						log.Infof("%s : %d\n", key, value)
 					}
 				}
-				fmt.Println("=========================================")
-				err := senders.SendMetrics(metrics, serverAddress)
+				log.Info("=========================================")
+				err := senders.SendMetrics(metrics, serverAddr)
 				if err != nil {
-					fmt.Printf("Error SendMetrics - %s", err)
+					log.Errorf("Error SendMetrics - %s", err)
 				}
 			}
 		}
