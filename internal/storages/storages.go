@@ -1,6 +1,7 @@
 package storages
 
 import (
+	"errors"
 	"sync"
 )
 
@@ -12,10 +13,10 @@ const (
 	Counter MetricType = "counter"
 )
 
-// MetricValue хранит значение метрики, которое может быть представлено как float64 или int64
+// MetricValue хранит значение метрики, которое может быть представлено как float64 или uint64
 type MetricValue struct {
 	GaugeValue   float64
-	CounterValue int64
+	CounterValue uint64
 }
 
 // MemStorage структура для хранения метрик
@@ -32,17 +33,45 @@ func NewMemStorage() *MemStorage {
 }
 
 // UpdateMetric обновляет метрику в хранилище
-func (s *MemStorage) UpdateMetric(name string, mType MetricType, value MetricValue) {
+func (s *MemStorage) UpdateMetric(name string, mType MetricType, value MetricValue) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if mType == Gauge {
+	switch mType {
+	case Gauge:
 		s.metrics[name] = value
-	} else if mType == Counter {
+	case Counter:
 		if existing, ok := s.metrics[name]; ok {
 			value.CounterValue += existing.CounterValue
 		}
 		s.metrics[name] = value
+	default:
+		return errors.New("unknown metric type")
 	}
-	//fmt.Printf("Key: %s, value: %v\n", name, value)
+
+	//log.Infof("Key: %s, value: %v\n", name, value)
+	return nil
+}
+
+// GetMetric возвращает метрику из хранилища
+func (s *MemStorage) GetMetric(name string) (MetricValue, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	value, ok := s.metrics[name]
+	return value, ok
+}
+
+// GetAllMetrics возвращает список всех метрик и значений из хранилища
+func (s *MemStorage) GetAllMetrics() (map[string]MetricValue, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	// Создаем новую мапу для возврата значений
+	metricsCopy := make(map[string]MetricValue, len(s.metrics))
+	for key, value := range s.metrics {
+		metricsCopy[key] = value
+	}
+
+	return metricsCopy, nil
 }
