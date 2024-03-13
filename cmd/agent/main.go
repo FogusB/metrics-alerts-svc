@@ -1,5 +1,7 @@
 package main
 
+//go:generate go build -o=agent
+
 import (
 	"fmt"
 	"github.com/FogusB/metrics-alerts-svc/internal/collects"
