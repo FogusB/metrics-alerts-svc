@@ -1,5 +1,7 @@
 package main
 
+//go:generate go build -o=server
+
 import (
 	"flag"
 	"github.com/FogusB/metrics-alerts-svc/internal/handlers"

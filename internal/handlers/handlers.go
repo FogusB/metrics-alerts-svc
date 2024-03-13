@@ -27,7 +27,8 @@ func (h *MetricHandler) UpdateMetricValue(c *gin.Context) {
 		return
 	}
 
-	if c.Request.Header.Get("Content-Type") != "text/plain" {
+	contentType := c.GetHeader("Content-Type")
+	if contentType != "" && contentType != "text/plain" {
 		c.String(http.StatusUnsupportedMediaType, "Unsupported Media Type")
 		log.Warning("unsupported media type")
 		return
