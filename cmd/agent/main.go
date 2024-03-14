@@ -14,7 +14,7 @@ func main() {
 	var serverAddr string
 	var reportInterval, pollInterval time.Duration
 
-	flag.StringVar(&serverAddr, "a", "localhost:8080", "HTTP server address")
+	flag.StringVar(&serverAddr, "a", "http://localhost:8080", "HTTP server address")
 	flag.DurationVar(&reportInterval, "r", 10*time.Second, "Report interval (s)")
 	flag.DurationVar(&pollInterval, "p", 2*time.Second, "Poll interval (s)")
 	flag.Parse()
