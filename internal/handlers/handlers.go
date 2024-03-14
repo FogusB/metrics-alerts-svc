@@ -16,7 +16,7 @@ type MetricHandler struct {
 
 type Storage interface {
 	UpdateMetric(name string, mType storages.MetricType, value storages.MetricValue) error
-	GetMetric(name string) (storages.MetricValue, bool)
+	GetMetric(name string) (storages.Value, bool)
 	GetAllMetrics() (map[string]storages.MetricValue, error)
 }
 

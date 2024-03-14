@@ -54,8 +54,14 @@ func TestMemStorage_GetMetric(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotValue, gotOk := storage.GetMetric(tt.name)
-			if !reflect.DeepEqual(gotValue, tt.wantValue) || gotOk != tt.wantOk {
-				t.Errorf("MemStorage.GetMetric() = %v, %v, want %v, %v", gotValue, gotOk, tt.wantValue, tt.wantOk)
+			//if !reflect.DeepEqual(gotValue, tt.wantValue) || gotOk != tt.wantOk {
+			//	t.Errorf("MemStorage.GetMetric() = %v, %v, want %v, %v", gotValue, gotOk, tt.wantValue, tt.wantOk)
+			//}
+			// Проверка только актуального значения для данного типа метрики
+			if tt.name == "testGauge" && (gotValue.GetValue() != tt.wantValue.GaugeValue || gotOk != tt.wantOk) {
+				t.Errorf("MemStorage.GetMetric() GaugeValue = %v, %v, want %v, %v", gotValue.GetValue(), gotOk, tt.wantValue.GaugeValue, tt.wantOk)
+			} else if tt.name == "testCounter" && (gotValue.GetValue() != tt.wantValue.CounterValue || gotOk != tt.wantOk) {
+				t.Errorf("MemStorage.GetMetric() CounterValue = %v, %v, want %v, %v", gotValue.GetValue(), gotOk, tt.wantValue.CounterValue, tt.wantOk)
 			}
 		})
 	}
