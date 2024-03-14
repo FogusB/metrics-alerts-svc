@@ -2,6 +2,7 @@ package storages
 
 import (
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -23,6 +24,21 @@ type MetricValue struct {
 type MemStorage struct {
 	mu      sync.RWMutex
 	metrics map[string]MetricValue
+}
+
+type Value interface {
+	GetValue() interface{}
+}
+
+type FloatValue float64
+type UintValue uint64
+
+func (f FloatValue) GetValue() interface{} {
+	return float64(f)
+}
+
+func (u UintValue) GetValue() interface{} {
+	return uint64(u)
 }
 
 // NewMemStorage создает новый экземпляр MemStorage
@@ -54,12 +70,22 @@ func (s *MemStorage) UpdateMetric(name string, mType MetricType, value MetricVal
 }
 
 // GetMetric возвращает метрику из хранилища
-func (s *MemStorage) GetMetric(name string) (MetricValue, bool) {
+func (s *MemStorage) GetMetric(name string) (Value, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	value, ok := s.metrics[name]
-	return value, ok
+	metricValue, ok := s.metrics[name]
+	if metricValue.GaugeValue != 0 {
+		//log.Info(FloatValue(metricValue.GaugeValue))
+		return FloatValue(metricValue.GaugeValue), ok
+	} else if metricValue.CounterValue != 0 {
+		//log.Info(UintValue(metricValue.CounterValue))
+		return UintValue(metricValue.CounterValue), ok
+	} else {
+		log.Errorf("Key: %s, value: %v\n", name, metricValue)
+		return UintValue(0), false
+	}
+
 }
 
 // GetAllMetrics возвращает список всех метрик и значений из хранилища
