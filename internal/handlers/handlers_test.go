@@ -22,9 +22,9 @@ func (m *MockStorage) UpdateMetric(name string, mType storages.MetricType, value
 	return args.Error(0)
 }
 
-func (m *MockStorage) GetMetric(name string) (storages.MetricValue, bool) {
+func (m *MockStorage) GetMetric(name string) (storages.Value, bool) {
 	args := m.Called(name)
-	return args.Get(0).(storages.MetricValue), args.Bool(1)
+	return args.Get(0).(storages.Value), args.Bool(1)
 }
 
 func (m *MockStorage) GetAllMetrics() (map[string]storages.MetricValue, error) {
@@ -131,7 +131,7 @@ func TestGetMetricValue(t *testing.T) {
 	r.GET("/metric/:name", handler.GetMetricValue)
 
 	t.Run("metric found", func(t *testing.T) {
-		mockStorage.On("GetMetric", "test").Return(storages.MetricValue{GaugeValue: 123.45}, true)
+		mockStorage.On("GetMetric", "test").Return(storages.FloatValue(123.45), true)
 
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "/metric/test", nil)
@@ -143,7 +143,7 @@ func TestGetMetricValue(t *testing.T) {
 	})
 
 	t.Run("metric not found", func(t *testing.T) {
-		mockStorage.On("GetMetric", "unknown").Return(storages.MetricValue{}, false)
+		mockStorage.On("GetMetric", "unknown").Return(storages.UintValue(0), false)
 
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "/metric/unknown", nil)
