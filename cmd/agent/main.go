@@ -11,13 +11,16 @@ import (
 )
 
 func main() {
-	var serverAddr string
+	var serverAddrFlag string
+	url_schema := "http://"
 	var reportInterval, pollInterval time.Duration
 
-	flag.StringVar(&serverAddr, "a", "http://localhost:8080", "HTTP server address")
+	flag.StringVar(&serverAddrFlag, "a", "localhost:8080", "HTTP server address")
 	flag.DurationVar(&reportInterval, "r", 10*time.Second, "Report interval (s)")
 	flag.DurationVar(&pollInterval, "p", 2*time.Second, "Poll interval (s)")
 	flag.Parse()
+
+	serverAddr := url_schema + serverAddrFlag
 
 	log.Infof("Server address: %s\n", serverAddr)
 	log.Infof("Report interval: %v\n", reportInterval)
