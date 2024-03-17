@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Список Метрик</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>Список метрик</h2>
+    <table>
+        <tr>
+            <th>Имя метрики</th>
+            <th>Тип</th>
+            <th>Значение</th>
+        </tr>
+        {{range $name, $metric := .metrics}}
+        <tr>
+            <td>{{$name}}</td>
+            <td>{{if $metric.GaugeValue}}Gauge{{else}}Counter{{end}}</td>
+            <td>{{if $metric.GaugeValue}}{{printf "%.2f" $metric.GaugeValue}}{{else}}{{printf "%d" $metric.CounterValue}}{{end}}</td>
+        </tr>
+        {{end}}
+    </table>
+</body>
+</html>
