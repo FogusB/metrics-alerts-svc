@@ -11,23 +11,21 @@ import (
 )
 
 func main() {
-	var serverAddrFlag string
-	url_schema := "http://"
-	var reportInterval, pollInterval time.Duration
+	var serverAddr string
+	urlSchema := "http://"
+	var reportInterval, pollInterval int
 
-	flag.StringVar(&serverAddrFlag, "a", "localhost:8080", "HTTP server address")
-	flag.DurationVar(&reportInterval, "r", 10*time.Second, "Report interval (s)")
-	flag.DurationVar(&pollInterval, "p", 2*time.Second, "Poll interval (s)")
+	flag.StringVar(&serverAddr, "a", "127.0.0.1:8080", "HTTP server address")
+	flag.IntVar(&reportInterval, "r", 10, "Report interval (s)")
+	flag.IntVar(&pollInterval, "p", 2, "Poll interval (s)")
 	flag.Parse()
 
-	serverAddr := url_schema + serverAddrFlag
+	log.Infof("Server address: %s\n", urlSchema+serverAddr)
+	log.Infof("Report interval: %v\n", time.Duration(reportInterval)*time.Second)
+	log.Infof("Poll interval: %v\n", time.Duration(pollInterval)*time.Second)
 
-	log.Infof("Server address: %s\n", serverAddr)
-	log.Infof("Report interval: %v\n", reportInterval)
-	log.Infof("Poll interval: %v\n", pollInterval)
-
-	tickerPoll := time.NewTicker(pollInterval)
-	tickerReport := time.NewTicker(reportInterval)
+	tickerPoll := time.NewTicker(time.Duration(reportInterval) * time.Second)
+	tickerReport := time.NewTicker(time.Duration(pollInterval) * time.Second)
 
 	metrics := make(map[string]interface{})
 
@@ -54,7 +52,7 @@ func main() {
 					}
 				}
 				log.Info("=========================================")
-				err := senders.SendMetrics(metrics, serverAddr)
+				err := senders.SendMetrics(metrics, urlSchema+serverAddr)
 				if err != nil {
 					log.Errorf("Error SendMetrics - %s", err)
 				}
