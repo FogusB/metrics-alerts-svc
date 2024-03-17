@@ -6,26 +6,62 @@ import (
 	"flag"
 	"github.com/FogusB/metrics-alerts-svc/internal/collects"
 	"github.com/FogusB/metrics-alerts-svc/internal/senders"
+	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
+	"net/url"
 	"time"
 )
 
-func main() {
-	var serverAddr string
-	urlSchema := "http://"
-	var reportInterval, pollInterval int
+type Config struct {
+	AddressEnv        url.URL `env:"ADDRESS"`
+	AddressSrv        string
+	ReportIntervalEnv int `env:"REPORT_INTERVAL"`
+	ReportInterval    int
+	PollIntervalEnv   int `env:"POLL_INTERVAL"`
+	PollInterval      int
+}
 
-	flag.StringVar(&serverAddr, "a", "127.0.0.1:8080", "HTTP server address")
-	flag.IntVar(&reportInterval, "r", 10, "Report interval (s)")
-	flag.IntVar(&pollInterval, "p", 2, "Poll interval (s)")
+func parseFlags() (string, time.Duration, time.Duration) {
+	var cfg Config
+	urlSchema := "http://"
+
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Info(cfg)
+
+	flag.StringVar(&cfg.AddressSrv, "a", "localhost:8080", "HTTP server address")
+	flag.IntVar(&cfg.ReportInterval, "r", 10, "Report interval (s)")
+	flag.IntVar(&cfg.PollInterval, "p", 2, "Poll interval (s)")
 	flag.Parse()
 
-	log.Infof("Server address: %s\n", urlSchema+serverAddr)
-	log.Infof("Report interval: %v\n", time.Duration(reportInterval)*time.Second)
-	log.Infof("Poll interval: %v\n", time.Duration(pollInterval)*time.Second)
+	if cfg.AddressEnv.String() != "" {
+		cfg.AddressSrv = cfg.AddressEnv.String()
+	}
+	cfg.AddressSrv = urlSchema + cfg.AddressSrv
 
-	tickerPoll := time.NewTicker(time.Duration(reportInterval) * time.Second)
-	tickerReport := time.NewTicker(time.Duration(pollInterval) * time.Second)
+	if cfg.ReportIntervalEnv != 0 {
+		cfg.ReportInterval = cfg.ReportIntervalEnv
+	}
+
+	if cfg.PollIntervalEnv != 0 {
+		cfg.PollInterval = cfg.PollIntervalEnv
+	}
+
+	return cfg.AddressSrv, time.Duration(cfg.ReportInterval) * time.Second, time.Duration(cfg.PollInterval) * time.Second
+}
+
+func main() {
+	runAddress, reportInterval, pollInterval := parseFlags()
+
+	log.Infof("Server address: %s\n", runAddress)
+	log.Infof("Report interval: %v\n", reportInterval)
+	log.Infof("Poll interval: %v\n", pollInterval)
+
+	tickerPoll := time.NewTicker(reportInterval)
+	tickerReport := time.NewTicker(pollInterval)
 
 	metrics := make(map[string]interface{})
 
@@ -52,7 +88,7 @@ func main() {
 					}
 				}
 				log.Info("=========================================")
-				err := senders.SendMetrics(metrics, urlSchema+serverAddr)
+				err := senders.SendMetrics(metrics, runAddress)
 				if err != nil {
 					log.Errorf("Error SendMetrics - %s", err)
 				}
