@@ -26,3 +26,6 @@ vendor/
 
 .tools
 main
+
+bin/agent
+bin/server

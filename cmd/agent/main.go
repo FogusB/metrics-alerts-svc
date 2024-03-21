@@ -1,60 +1,17 @@
 package main
 
-//go:generate go build -o=agent
+//go:generate go build -o=../../bin/agent
 
 import (
-	"flag"
 	"github.com/FogusB/metrics-alerts-svc/internal/collects"
+	"github.com/FogusB/metrics-alerts-svc/internal/flags"
 	"github.com/FogusB/metrics-alerts-svc/internal/senders"
-	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
-	"net/url"
 	"time"
 )
 
-type Config struct {
-	AddressEnv        url.URL `env:"ADDRESS"`
-	AddressSrv        string
-	ReportIntervalEnv int `env:"REPORT_INTERVAL"`
-	ReportInterval    int
-	PollIntervalEnv   int `env:"POLL_INTERVAL"`
-	PollInterval      int
-}
-
-func parseFlags() (string, time.Duration, time.Duration) {
-	var cfg Config
-	urlSchema := "http://"
-
-	err := env.Parse(&cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Info(cfg)
-
-	flag.StringVar(&cfg.AddressSrv, "a", "localhost:8080", "HTTP server address")
-	flag.IntVar(&cfg.ReportInterval, "r", 10, "Report interval (s)")
-	flag.IntVar(&cfg.PollInterval, "p", 2, "Poll interval (s)")
-	flag.Parse()
-
-	if cfg.AddressEnv.String() != "" {
-		cfg.AddressSrv = cfg.AddressEnv.String()
-	}
-	cfg.AddressSrv = urlSchema + cfg.AddressSrv
-
-	if cfg.ReportIntervalEnv != 0 {
-		cfg.ReportInterval = cfg.ReportIntervalEnv
-	}
-
-	if cfg.PollIntervalEnv != 0 {
-		cfg.PollInterval = cfg.PollIntervalEnv
-	}
-
-	return cfg.AddressSrv, time.Duration(cfg.ReportInterval) * time.Second, time.Duration(cfg.PollInterval) * time.Second
-}
-
 func main() {
-	runAddress, reportInterval, pollInterval := parseFlags()
+	runAddress, reportInterval, pollInterval := flags.ParseFlags("agent")
 
 	log.Infof("Server address: %s\n", runAddress)
 	log.Infof("Report interval: %v\n", reportInterval)

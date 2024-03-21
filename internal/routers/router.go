@@ -2,9 +2,10 @@
 package routers
 
 import (
-	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
 )
 
 // Run запускает HTTP-сервер с заданными маршрутами.
