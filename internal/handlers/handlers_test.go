@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"bytes"
@@ -7,10 +7,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
+	"github.com/FogusB/metrics-alerts-svc/internal/routers"
+	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 )
 
 type MockStorage struct {
@@ -96,11 +99,11 @@ func TestUpdateMetricValue(t *testing.T) {
 	}
 
 	mockStorage := new(MockStorage)
-	handler := MetricHandler{Storage: mockStorage}
+	handler := handlers.MetricHandler{Storage: mockStorage}
 
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
-	r.POST("/update/:type/:name/:value", handler.UpdateMetricValue)
+	r.POST("/update/:type/:name/:value", routers.CheckContentTypeMiddleware("text/plain"), handler.UpdateMetricValue)
 	r.GET("/update/:type/:name/:value", handler.UpdateMetricValue)
 
 	for _, tt := range tests {
@@ -124,7 +127,7 @@ func TestUpdateMetricValue(t *testing.T) {
 
 func TestGetMetricValue(t *testing.T) {
 	mockStorage := new(MockStorage)
-	handler := MetricHandler{Storage: mockStorage}
+	handler := handlers.MetricHandler{Storage: mockStorage}
 
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
@@ -155,7 +158,7 @@ func TestGetMetricValue(t *testing.T) {
 
 func TestGetAllMetrics(t *testing.T) {
 	mockStorage := new(MockStorage)
-	handler := MetricHandler{Storage: mockStorage}
+	handler := handlers.MetricHandler{Storage: mockStorage}
 
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()

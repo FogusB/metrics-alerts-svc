@@ -2,8 +2,9 @@ package storages
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // MetricType определяет тип метрики: gauge или counter

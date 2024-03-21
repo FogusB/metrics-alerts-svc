@@ -1,15 +1,17 @@
 package routers
 
 import (
-	"github.com/FogusB/metrics-alerts-svc/internal/storages"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 )
 
 type MockMetricHandler struct {

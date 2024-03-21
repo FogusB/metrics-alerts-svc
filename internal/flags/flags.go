@@ -2,9 +2,10 @@ package flags
 
 import (
 	"flag"
+	"time"
+
 	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 // ConfigVariables содержит конфигурационные переменные приложения.
