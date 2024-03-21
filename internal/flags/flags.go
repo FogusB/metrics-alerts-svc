@@ -22,15 +22,11 @@ type ConfigVariables struct {
 func ParseFlags(typeSvc string) (string, time.Duration, time.Duration) {
 	var cfg ConfigVariables
 	urlSchema := "http://"
-	defaultAddress := "localhost:8080"
 
 	if err := env.Parse(&cfg); err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
-	if typeSvc == "server" {
-		defaultAddress = ":8080"
-	}
-	flag.StringVar(&cfg.Address, "a", defaultAddress, "HTTP server address")
+	flag.StringVar(&cfg.Address, "a", "localhost:8080", "HTTP server address")
 	flag.IntVar(&cfg.ReportInterval, "r", 10, "Report interval")
 	flag.IntVar(&cfg.PollInterval, "p", 2, "Poll interval")
 	flag.Parse()

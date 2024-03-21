@@ -29,6 +29,7 @@ type MetricUpdateRequest struct {
 
 func (h *MetricHandler) UpdateMetricValue(c *gin.Context) {
 	var request MetricUpdateRequest
+	println(request.Type)
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Error("Ошибка привязки URI: ", err)
@@ -59,7 +60,7 @@ func (h *MetricHandler) UpdateMetricValue(c *gin.Context) {
 	}
 	if c.Request.Method != http.MethodPost {
 		c.String(http.StatusMethodNotAllowed, "Method Not Allowed")
-		log.Warning("method not allowed")
+		log.Warning("Метод не разрешен")
 		return
 	}
 

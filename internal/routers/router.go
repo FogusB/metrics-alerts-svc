@@ -10,11 +10,18 @@ import (
 	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
 )
 
-func CheckContentTypeMiddleware(expectedContentType string) gin.HandlerFunc {
+func CheckContentTypeMiddleware(expectedContentType string, expectedMethod string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if contentType := c.GetHeader("Content-Type"); contentType != expectedContentType {
+		contentType := c.GetHeader("Content-Type")
+		if contentType != expectedContentType && contentType != "" {
 			c.String(http.StatusUnsupportedMediaType, "Unsupported Media Type")
-			log.Warning("unsupported media type")
+			log.Warning("Не поддерживаемый тип контента")
+			c.Abort()
+			return
+		}
+		if c.Request.Method != expectedMethod {
+			c.String(http.StatusMethodNotAllowed, "Method Not Allowed")
+			log.Warning("Метод не поддерживается")
 			c.Abort()
 			return
 		}
@@ -39,7 +46,7 @@ func Run(metricHandler *handlers.MetricHandler, addr string) {
 
 // ServeRoutes настраивает маршруты для веб-сервера.
 func ServeRoutes(router *gin.Engine, metricHandler *handlers.MetricHandler) {
-	router.POST("/update/:type/:name/:value", CheckContentTypeMiddleware("text/plain"), metricHandler.UpdateMetricValue)
-	router.GET("/value/:type/:name", CheckContentTypeMiddleware("text/plain"), metricHandler.GetMetricValue)
-	router.GET("/", CheckContentTypeMiddleware("text/plain"), metricHandler.GetAllMetrics)
+	router.POST("/update/:type/:name/:value", CheckContentTypeMiddleware("text/plain", http.MethodPost), metricHandler.UpdateMetricValue)
+	router.GET("/value/:type/:name", CheckContentTypeMiddleware("text/plain", http.MethodGet), metricHandler.GetMetricValue)
+	router.GET("/", CheckContentTypeMiddleware("text/plain", http.MethodGet), metricHandler.GetAllMetrics)
 }
