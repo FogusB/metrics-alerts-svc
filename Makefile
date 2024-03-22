@@ -41,6 +41,11 @@ audit:
 # DEVELOPMENT
 # ==================================================================================== #
 
+## lint: run linters
+.PHONY: lint
+lint:
+	golangci-lint run ./...
+
 ## test: run all tests
 .PHONY: test
 test:
@@ -61,9 +66,9 @@ build:
 
 ## run: run the  application
 .PHONY: run/server
-run: build
+run/server: build
 	./bin/server
 
 .PHONY: run/agent
-run: build
+run/agent: build
 	./bin/agent
