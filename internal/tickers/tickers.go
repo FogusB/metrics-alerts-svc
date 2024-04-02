@@ -4,15 +4,17 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/FogusB/metrics-alerts-svc/internal/collects"
 	"github.com/FogusB/metrics-alerts-svc/internal/senders"
 )
 
 func Tickers(runAddress string, pollInterval time.Duration, reportInterval time.Duration) {
-	log.Infof("Server address: %s\n", runAddress)
-	log.Infof("Report interval: %v\n", reportInterval)
-	log.Infof("Poll interval: %v\n", pollInterval)
+	zap.L().Sugar().Info("Agent started")
+	zap.L().Sugar().Infof("Server address: %s", runAddress)
+	zap.L().Sugar().Infof("Report interval: %v", reportInterval)
+	zap.L().Sugar().Infof("Poll interval: %v", pollInterval)
 
 	tickerPoll := time.NewTicker(pollInterval)
 	tickerReport := time.NewTicker(reportInterval)

@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/FogusB/metrics-alerts-svc/internal/handlers"
-	"github.com/FogusB/metrics-alerts-svc/internal/routers"
+	"github.com/FogusB/metrics-alerts-svc/internal/middleware"
 	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 )
 
@@ -103,8 +103,8 @@ func TestUpdateMetricValue(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
-	r.POST("/update/:type/:name/:value", routers.CheckContentTypeMiddleware("text/plain", http.MethodPost), handler.UpdateMetricValue)
-	r.GET("/update/:type/:name/:value", routers.CheckContentTypeMiddleware("text/plain", http.MethodGet), handler.UpdateMetricValue)
+	r.POST("/update/:type/:name/:value", middleware.CheckContentTypeMiddleware("text/plain", http.MethodPost), handler.UpdateMetricValue)
+	r.GET("/update/:type/:name/:value", middleware.CheckContentTypeMiddleware("text/plain", http.MethodGet), handler.UpdateMetricValue)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -131,7 +131,7 @@ func TestGetMetricValue(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
-	r.GET("/metric/:name", routers.CheckContentTypeMiddleware("text/plain", http.MethodGet), handler.GetMetricValue)
+	r.GET("/metric/:name", middleware.CheckContentTypeMiddleware("text/plain", http.MethodGet), handler.GetMetricValue)
 
 	t.Run("metric found", func(t *testing.T) {
 		mockStorage.On("GetMetric", "test").Return(storages.FloatValue(123.45), true)
@@ -163,7 +163,7 @@ func TestGetAllMetrics(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.LoadHTMLGlob("../../templates/*")
-	r.GET("/", routers.CheckContentTypeMiddleware("text/plain", http.MethodGet), handler.GetAllMetrics)
+	r.GET("/", middleware.CheckContentTypeMiddleware("text/plain", http.MethodGet), handler.GetAllMetrics)
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("GetAllMetrics").Return(map[string]storages.MetricValue{"test": {GaugeValue: 123.45}}, nil)
