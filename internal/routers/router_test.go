@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -51,13 +50,14 @@ func TestServeRoutes(t *testing.T) {
 			var err error
 			value.GaugeValue, err = strconv.ParseFloat(rawValue, 64)
 			if err != nil {
+				t.Errorf("Invalid value: %s", err)
 				c.JSON(http.StatusBadRequest, gin.H{"message": "invalid value"})
 				return
 			}
 
 			err = mockHandler.UpdateMetricValue(name, mType, value)
 			if err != nil {
-				log.Error(err)
+				t.Errorf("Error updating metric: %s", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "Error updating metric"})
 				return
 			}
@@ -99,6 +99,7 @@ func TestServeRoutes(t *testing.T) {
 		r.GET("/", func(c *gin.Context) {
 			metrics, err := mockHandler.GetAllMetrics()
 			if err != nil {
+				t.Errorf("Error getting metrics: %s", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "Error getting metrics"})
 				return
 			}

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 // MetricType определяет тип метрики: gauge или counter
@@ -83,7 +83,7 @@ func (s *MemStorage) GetMetric(name string) (Value, bool) {
 		//log.Info(UintValue(metricValue.CounterValue))
 		return UintValue(metricValue.CounterValue), ok
 	} else {
-		log.Errorf("Key: %s, value: %v\n", name, metricValue)
+		zap.L().Sugar().Errorf("Key: %s, value: %v\n", name, metricValue)
 		return UintValue(0), false
 	}
 

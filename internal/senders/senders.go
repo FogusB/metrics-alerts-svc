@@ -3,6 +3,8 @@ package senders
 import (
 	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 func SendMetrics(metrics map[string]interface{}, serverAddress string) error {
@@ -19,7 +21,7 @@ func SendMetrics(metrics map[string]interface{}, serverAddress string) error {
 		case int64:
 			request, err = http.NewRequest("POST", fmt.Sprintf("%s/update/counter/%s/%d", serverAddress, key, v), nil)
 		default:
-			fmt.Printf("Broken key: %s, broken value: %v, type: %T\n", key, v, v)
+			zap.L().Sugar().Warnf("Broken key: %s, broken value: %v, type: %T\n", key, v, v)
 			continue // В этом случае продолжаем, так как это не критическая ошибка для всей операции
 		}
 
