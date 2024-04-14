@@ -1,12 +1,17 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/FogusB/metrics-alerts-svc/internal/models"
 )
 
 func GlobalLogger() {
@@ -35,18 +40,30 @@ func RequestLogger(logger *zap.Logger) gin.HandlerFunc {
 		start := time.Now()
 		path := c.Request.URL.Path
 		method := c.Request.Method
-
-		// Обработка запроса
-		c.Next()
+		jsonDataBytes, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			zap.L().Error("Error reading request body: ", zap.Error(err))
+		}
 
 		// Подсчет времени
 		end := time.Now()
 		duration := end.Sub(start)
 
+		// Обработка запроса
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(jsonDataBytes))
+		c.Next()
+
+		var jsonData models.Metrics
+		err = json.Unmarshal(jsonDataBytes, &jsonData)
+		if err != nil {
+			zap.L().Error("Error unmarshalling request body: ", zap.Error(err))
+		}
+
 		// Логирование запроса
 		logger.Info("request",
 			zap.String("path", path),
 			zap.String("method", method),
+			zap.Any("body", jsonData),
 			zap.Duration("duration", duration),
 		)
 
@@ -57,5 +74,6 @@ func RequestLogger(logger *zap.Logger) gin.HandlerFunc {
 			zap.Int("status", statusCode),
 			zap.Int("size", responseSize),
 		)
+
 	}
 }

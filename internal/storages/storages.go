@@ -18,7 +18,7 @@ const (
 // MetricValue хранит значение метрики, которое может быть представлено как float64 или uint64
 type MetricValue struct {
 	GaugeValue   float64
-	CounterValue uint64
+	CounterValue int64
 }
 
 // MemStorage структура для хранения метрик

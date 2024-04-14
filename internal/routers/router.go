@@ -33,6 +33,7 @@ func Run(metricHandler *handlers.MetricHandler, addr string) {
 
 // ServeRoutes настраивает маршруты для веб-сервера.
 func ServeRoutes(router *gin.Engine, metricHandler *handlers.MetricHandler) {
+	router.POST("/update/", middleware.CheckContentTypeMiddleware("application/json", http.MethodPost), metricHandler.RestUpdateMetricValue)
 	router.POST("/update/:type/:name/:value", middleware.CheckContentTypeMiddleware("text/plain", http.MethodPost), metricHandler.UpdateMetricValue)
 	router.GET("/value/:type/:name", middleware.CheckContentTypeMiddleware("text/plain", http.MethodGet), metricHandler.GetMetricValue)
 	router.GET("/", middleware.CheckContentTypeMiddleware("text/plain", http.MethodGet), metricHandler.GetAllMetrics)

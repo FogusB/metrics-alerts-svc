@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
+	"github.com/FogusB/metrics-alerts-svc/internal/models"
 	"github.com/FogusB/metrics-alerts-svc/internal/storages"
 )
 
@@ -27,12 +28,43 @@ type MetricUpdateRequest struct {
 	Value string              `uri:"value" binding:"required"`
 }
 
+func (h *MetricHandler) RestUpdateMetricValue(c *gin.Context) {
+	// ВАЖНО: После чтения тела необходимо вернуть его обратно, чтобы c.Bind мог его прочитать
+	//data, _ := io.ReadAll(c.Request.Body)
+	//fmt.Println(string(data))
+	//c.Request.Body = io.NopCloser(bytes.NewBuffer(data))
+
+	var metric models.Metrics
+	if err := c.Bind(&metric); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		zap.L().Error("Ошибка парсинга JSON: ", zap.Error(err))
+		return
+	}
+
+	var value storages.MetricValue
+	switch metric.MType {
+	case "gauge":
+		value.GaugeValue = *metric.Value
+	case "counter":
+		value.CounterValue = *metric.Delta
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid metric type"})
+		return
+	}
+
+	if err := h.Storage.UpdateMetric(metric.ID, storages.MetricType(metric.MType), value); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating metric"})
+		zap.L().Error("Ошибка обновления метрики: ", zap.Error(err))
+		return
+	}
+	c.JSON(http.StatusOK, metric)
+}
+
 func (h *MetricHandler) UpdateMetricValue(c *gin.Context) {
 	var request MetricUpdateRequest
-	println(request.Type)
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		zap.L().Error("Ошибка привязки URI: ", zap.Error(err))
+		zap.L().Error("Ошибка парсинга URI: ", zap.Error(err))
 		return
 	}
 
@@ -42,7 +74,7 @@ func (h *MetricHandler) UpdateMetricValue(c *gin.Context) {
 	case storages.Gauge:
 		value.GaugeValue, parseErr = strconv.ParseFloat(request.Value, 64)
 	case storages.Counter:
-		value.CounterValue, parseErr = strconv.ParseUint(request.Value, 10, 64)
+		value.CounterValue, parseErr = strconv.ParseInt(request.Value, 10, 64)
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid metric type"})
 		return
