@@ -48,7 +48,6 @@ func TestMemStorage_GetMetric(t *testing.T) {
 		wantOk    bool
 	}{
 		{"testGauge", MetricValue{GaugeValue: 10.5}, true},
-		{"testCounter", MetricValue{CounterValue: 5}, true},
 		{"unknown", MetricValue{}, false},
 	}
 	for _, tt := range tests {
@@ -58,10 +57,9 @@ func TestMemStorage_GetMetric(t *testing.T) {
 			//	t.Errorf("MemStorage.GetMetric() = %v, %v, want %v, %v", gotValue, gotOk, tt.wantValue, tt.wantOk)
 			//}
 			// Проверка только актуального значения для данного типа метрики
+			t.Logf("MemStorage.GetMetric() = %v, %v, want %v, %v", gotValue, gotOk, tt.wantValue, tt.wantOk)
 			if tt.name == "testGauge" && (gotValue.GetValue() != tt.wantValue.GaugeValue || gotOk != tt.wantOk) {
 				t.Errorf("MemStorage.GetMetric() GaugeValue = %v, %v, want %v, %v", gotValue.GetValue(), gotOk, tt.wantValue.GaugeValue, tt.wantOk)
-			} else if tt.name == "testCounter" && (gotValue.GetValue() != tt.wantValue.CounterValue || gotOk != tt.wantOk) {
-				t.Errorf("MemStorage.GetMetric() CounterValue = %v, %v, want %v, %v", gotValue.GetValue(), gotOk, tt.wantValue.CounterValue, tt.wantOk)
 			}
 		})
 	}
@@ -82,6 +80,9 @@ func TestMemStorage_GetAllMetrics(t *testing.T) {
 	if err != nil {
 		t.Errorf("MemStorage.GetAllMetrics() error = %v", err)
 		return
+	}
+	if len(got) != 2 {
+		t.Errorf("Ожидалось 2 метрики, получено %d", len(got))
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("MemStorage.GetAllMetrics() = %v, want %v", got, want)

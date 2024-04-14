@@ -1,43 +1,38 @@
 package senders
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/FogusB/metrics-alerts-svc/internal/models"
 )
 
-func SendMetrics(metrics map[string]interface{}, serverAddress string) error {
+// SendMetrics отправляет метрики на сервер
+func SendMetrics(metrics []models.Metrics, serverAddress string) error {
 	client := &http.Client{}
-	for key, value := range metrics {
-		var request *http.Request
-		var err error
-		//fmt.Printf("type: %T\n", value)
-		switch v := value.(type) {
-		case float64:
-			request, err = http.NewRequest("POST", fmt.Sprintf("%s/update/gauge/%s/%f", serverAddress, key, v), nil)
-		case uint64, uint32:
-			request, err = http.NewRequest("POST", fmt.Sprintf("%s/update/gauge/%s/%d", serverAddress, key, v), nil)
-		case int64:
-			request, err = http.NewRequest("POST", fmt.Sprintf("%s/update/counter/%s/%d", serverAddress, key, v), nil)
-		default:
-			fmt.Printf("Broken key: %s, broken value: %v, type: %T\n", key, v, v)
-			continue // В этом случае продолжаем, так как это не критическая ошибка для всей операции
-		}
-
+	var request *http.Request
+	for _, metric := range metrics {
+		jsonData, err := json.Marshal(metric)
 		if err != nil {
-			return fmt.Errorf("error creating request for key %s: %w", key, err)
+			return fmt.Errorf("marshaling json for key %v: %w", metric, err)
+		}
+		request, err = http.NewRequest("POST", fmt.Sprintf("%s/update/", serverAddress), bytes.NewBuffer(jsonData))
+		if err != nil {
+			return fmt.Errorf("creating request for key %v: %w", metric, err)
 		}
 
-		request.Header.Set("Content-Type", "text/plain")
+		request.Header.Set("Content-Type", "application/json")
 
 		response, err := client.Do(request)
 		if err != nil {
-			return fmt.Errorf("error sending request for key %s: %w", key, err)
+			return fmt.Errorf("sending request for key %v: %w", metric, err)
 		}
 		err = response.Body.Close()
 		if err != nil {
-			return fmt.Errorf("error closing response body for key %s: %w", key, err)
+			return fmt.Errorf("closing response body for key %v: %w", metric, err)
 		}
 	}
-
-	return nil // Возвращаем nil, если функция выполнена без ошибок
+	return nil
 }
