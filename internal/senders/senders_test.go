@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/FogusB/metrics-alerts-svc/internal/models"
 )
 
 func TestSendMetrics(t *testing.T) {
@@ -21,73 +23,75 @@ func TestSendMetrics(t *testing.T) {
 	}))
 	defer testServer.Close()
 
+	tempFloat64 := 5.5
+	tempInt64 := int64(55)
 	tests := []struct {
 		name    string
-		metrics map[string]interface{}
+		metrics []models.Metrics
 		wantErr bool
 		errMsg  string
 	}{
 		{
 			name: "valid gauge metric",
-			metrics: map[string]interface{}{
-				"cpu":    0.95,
-				"memory": uint64(1024),
-				"disk":   int64(100),
+			metrics: []models.Metrics{
+				{"memory", "gauge", nil, &tempFloat64},
+				{"cpu", "gauge", nil, &tempFloat64},
 			},
 			wantErr: false,
 		},
 		{
 			name: "valid counter metric",
-			metrics: map[string]interface{}{
-				"requests": int64(100),
+			metrics: []models.Metrics{
+				{"disk", "counter", &tempInt64, nil},
+				{"requests", "counter", &tempInt64, nil},
 			},
 			wantErr: false,
 		},
 		{
 			name: "valid all metric",
-			metrics: map[string]interface{}{
-				"PollCount":     int64(1),
-				"NumForcedGC":   uint64(0),
-				"HeapSys":       uint64(7929856),
-				"MSpanInuse":    uint64(91896),
-				"HeapReleased":  uint64(5677056),
-				"HeapIdle":      uint64(6774784),
-				"Sys":           uint64(12618768),
-				"BuckHashSys":   uint64(3980),
-				"NextGC":        uint64(4194304),
-				"MSpanSys":      uint64(114072),
-				"PauseTotalNs":  uint64(73233000),
-				"HeapAlloc":     uint64(530400),
-				"StackInuse":    uint64(458752),
-				"HeapObjects":   uint64(4368),
-				"GCCPUFraction": 0.000006,
-				"RandomValue":   0.391760,
-				"MCacheSys":     uint64(15600),
-				"OtherSys":      uint64(713036),
-				"Alloc":         uint64(530400),
-				"Lookups":       uint64(0),
-				"LastGC":        uint64(1710153068469314000),
-				"GCSys":         uint64(3383472),
-				"Mallocs":       uint64(2051553),
-				"TotalAlloc":    uint64(172110256),
-				"HeapInuse":     uint64(1155072),
-				"MCacheInuse":   uint64(9600),
-				"Frees":         uint64(2047185),
-				"StackSys":      uint64(458752),
-				"NumGC":         uint64(125),
+			metrics: []models.Metrics{
+				{"PollCount", "counter", &tempInt64, nil},
+				{"NumForcedGC", "counter", &tempInt64, nil},
+				{"HeapSys", "counter", &tempInt64, nil},
+				{"MSpanInuse", "counter", &tempInt64, nil},
+				{"HeapReleased", "counter", &tempInt64, nil},
+				{"HeapIdle", "counter", &tempInt64, nil},
+				{"Sys", "counter", &tempInt64, nil},
+				{"BuckHashSys", "counter", &tempInt64, nil},
+				{"NextGC", "counter", &tempInt64, nil},
+				{"MSpanSys", "counter", &tempInt64, nil},
+				{"PauseTotalNs", "counter", &tempInt64, nil},
+				{"HeapAlloc", "counter", &tempInt64, nil},
+				{"StackInuse", "counter", &tempInt64, nil},
+				{"HeapObjects", "counter", &tempInt64, nil},
+				{"GCCPUFraction", "gauge", nil, &tempFloat64},
+				{"RandomValue", "gauge", nil, &tempFloat64},
+				{"MCacheSys", "counter", &tempInt64, nil},
+				{"OtherSys", "counter", &tempInt64, nil},
+				{"Alloc", "counter", &tempInt64, nil},
+				{"Lookups", "counter", &tempInt64, nil},
+				{"LastGC", "counter", &tempInt64, nil},
+				{"GCSys", "counter", &tempInt64, nil},
+				{"Mallocs", "counter", &tempInt64, nil},
+				{"TotalAlloc", "counter", &tempInt64, nil},
+				{"HeapInuse", "counter", &tempInt64, nil},
+				{"MCacheInuse", "counter", &tempInt64, nil},
+				{"Frees", "counter", &tempInt64, nil},
+				{"StackSys", "counter", &tempInt64, nil},
+				{"NumGC", "counter", &tempInt64, nil},
 			},
 			wantErr: false,
 		},
 		{
 			name: "unsupported metric type",
-			metrics: map[string]interface{}{
-				"usersOnline": "500", // строка вместо числа
+			metrics: []models.Metrics{
+				{"usersOnline", "usersOnline", &tempInt64, nil},
 			},
 			wantErr: false, // Функция продолжает работу, несмотря на неподдерживаемый тип
 		},
 		{
 			name:    "empty metrics",
-			metrics: map[string]interface{}{},
+			metrics: []models.Metrics{},
 			wantErr: false, // Пустые метрики не вызывают ошибку
 		},
 	}
